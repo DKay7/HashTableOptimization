@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LINKEDLIST
+#define LINKEDLIST
 
 #include <string.h>
 #include <stdio.h>
@@ -479,3 +480,7 @@ void __LLDrowSubgraph (FILE* file, LinkedList<T>* list, void (*DataPrinter)(FILE
 
     return;
 }
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+#endif

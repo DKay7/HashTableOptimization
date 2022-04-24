@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HASHTABLE
+#define HASHTABLE
 
 #include "list.h"
 #include <assert.h>
@@ -84,7 +85,7 @@ bool SimpleKeyEqualityFunction (K first, K second)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-HT_Bucket* HashTableBucketsArrayCtor (uint64_t size)
+static HT_Bucket* HashTableBucketsArrayCtor (uint64_t size)
 {
     HT_Bucket* buckets = (HT_Bucket*) calloc (size, sizeof (*buckets));
     ASS (buckets, NULL);
@@ -361,7 +362,7 @@ bool HashTableRehash (HashTable<K, V>* hash_table, bool keep_size=true)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void HashTableCompileDump (const char* filename_dot, const char* filename_out, const uint64_t filename_size)
+static void HashTableCompileDump (const char* filename_dot, const char* filename_out, const uint64_t filename_size)
 {
     const uint64_t compile_cmd_len = 28;
     const uint64_t open_cmd_len = 23;
@@ -603,3 +604,4 @@ void __HashTableDrawMinSubgraph (FILE* file, HashTable<K, V>* hash_table,  void 
 #undef HT_INCREASE_DECISION_COEF
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#endif
