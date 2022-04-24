@@ -4,7 +4,7 @@ DBFLAGS=-g -ggdb3 -O0 -std=c++14 -Wall -Wextra -Weffc++ -Waggressive-loop-optimi
 FASTFLAGS= -Ofast $(CFLAGS) -std=c++20
 
 SOURCES=main.cpp default_hash_functions.cpp ./libs/text_lib/texlib.cpp utilities.cpp
-INCLUDE=-I./libs/linked_list_templates/ -I./libs/text_lib/
+INCLUDE=-I./libs/linked_list_templates/ -I./libs/text_lib/ -I./libs/hashtable/
 EXECUTABLE=main
 
 
