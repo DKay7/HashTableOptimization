@@ -63,6 +63,7 @@ struct HashTable
 
     size_t size;
     size_t buckets_capacity;
+    bool resizable;
 };
 
 // flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -102,7 +103,7 @@ static HT_Bucket* HashTableBucketsArrayCtor (uint64_t size)
 template <typename K, typename V>
 void HashTableCtor (HashTable<K, V>* hash_table, size_t table_size, 
                     uint64_t (*HashFunction)(K), 
-                    bool (*KeyEqualityFunc)(K, K) = SimpleKeyEqualityFunction)
+                    bool (*KeyEqualityFunc)(K, K) = SimpleKeyEqualityFunction, bool resizable=false)
 {
     assert (hash_table);
     assert (HashFunction);
@@ -113,6 +114,7 @@ void HashTableCtor (HashTable<K, V>* hash_table, size_t table_size,
     hash_table->key_equality_func = KeyEqualityFunc;
 
     hash_table->size = table_size;
+    hash_table->resizable = resizable;
     
     hash_table->buckets = HashTableBucketsArrayCtor (table_size);
     ASS (hash_table->buckets, (void) 0);
@@ -130,9 +132,29 @@ void HashTableCtor (HashTable<K, V>* hash_table, size_t table_size,
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 template <typename K, typename V>
-void HashTableDtor (HashTable<K, V>* hash_table)
+void HashTableDtor (HashTable<K, V>* hash_table, bool deep_free=false)
 {
     assert (hash_table);
+
+    if (deep_free)
+    {   
+        for (uint64_t i = 0; i < hash_table->size; i++)
+        {
+            if (hash_table->buckets[i].status == BUCKET_NOT_EMPTY)
+            {   
+                uint64_t bucket_size = hash_table->buckets[i].len;
+                uint64_t val_idx = hash_table->buckets[i].start_index;
+                
+                for (uint64_t inner_inx = 0; inner_inx < bucket_size; inner_inx++)
+                {   
+                    free (hash_table->values->list[val_idx].data.key);
+                    free (hash_table->values->list[val_idx].data.value);
+
+                    val_idx = (uint64_t) hash_table->values->list[val_idx].next;
+                }
+            }
+        }
+    }
 
     LLDtor (hash_table->values);
     free (hash_table->values);
@@ -197,9 +219,11 @@ bool HashTableInsert (HashTable<K, V>* hash_table, K key, V value)
 
     // check if key is already in the table
     if (__HashTableSearchForKey(hash_table, key) != (uint64_t) MAX_LIST_ELEMENT)
-        return false;
+        ASS (false && "KEY IS ALREADY IN THE TABLE", false);
+        
     // check capacity and increase if needed
-    if ((double) hash_table->buckets_capacity *  HT_INCREASE_DECISION_COEF >= (double) hash_table->size)
+    if (((double) hash_table->buckets_capacity *  HT_INCREASE_DECISION_COEF >= (double) hash_table->size) \
+          && hash_table->resizable)
         HashTableRehash (hash_table, false);
 
     HT_Pair<K, V> pair = HashTablePairCtor (key, value);
@@ -224,7 +248,7 @@ bool HashTableInsert (HashTable<K, V>* hash_table, K key, V value)
         uint64_t index_to_insert_after = hash_table->buckets[position].start_index;
 
         int list_position = LLInsertAfter (hash_table->values, (int) index_to_insert_after, pair);
-        ASS (list_position > 0, false);
+        ASS (list_position > 0 && "Incorrect list position", false);
         hash_table->buckets[position].len += 1;
         hash_table->buckets_capacity += 1;
 

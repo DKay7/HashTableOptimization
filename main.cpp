@@ -1,12 +1,13 @@
-#include "default_hash_functions.h"
+#include "hash_functions_to_test.h"
 #include "hashtable.h"
 #include "utilities.h"
 #include <stdio.h>
 #include <locale.h>
+#include <assert.h>
+#include <time.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void data_printer (FILE* file, HT_Pair<char*, char*>* data_);
 bool key_equality (char* first, char* second);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -16,30 +17,37 @@ int main ()
     setlocale (LC_ALL, "ru_RU.iso88595");
     setlocale (LC_CTYPE, "ru_RU.iso88595");
 
+    #define TEST(func)                                                                              \
+    {                                                                                               \
+        HashTable<char*, char*> ht = {};                                                            \
+        clock_t start, end;                                                                         \
+                                                                                                    \
+        HashTableCtor<char*, char*> (&ht, 1000,   func, key_equality, true);                             \
+                                                                                                    \
+        start = clock();                                                                            \
+        char** lines_to_free = FillHashTableFromStrCSV (&ht, "data/en-ru.csv");                     \
+        end = clock();                                                                              \
+        double exec_time = ((double) (end - start)) / CLOCKS_PER_SEC;                               \
+        WriteStatsAboutHashTable (&ht, "./data/results/" #func "[various_size][buckets].csv");                    \
+        WriteExecutionHashTableStats (exec_time, ht.size, "./data/results/" #func "[various_size][stats].csv");   \
+                                                                                                    \
+                                                                                                    \
+        FreeHashTableAfterFillingFromStrCSV (lines_to_free);                                        \
+                                                                                                    \
+        free (lines_to_free);                                                                       \
+                                                                                                    \
+        HashTableDtor (&ht);                                                                        \
+    }
+    
+    #include "test_dsl.h"
 
-    HashTable<char*, char*> ht = {};
-    HashTableCtor<char*, char*> (&ht, 2, str_hash, key_equality);
-
-    FillHashTableFromStrCSV (&ht, "data/en-ru.csv");
-    // HashTableDump (&ht, data_printer);
-    HashTableDtor (&ht);
     return 0;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void data_printer (FILE* file, HT_Pair<char*, char*>* data_)
-{   
-    fprintf (file, "<table border=\"0\" cellborder=\"1\" cellspacing=\"0\">"
-                   "<tr><td>KEY:</td><td>%s</td></tr>"
-                   "<tr><td>VALUE:</td><td>%s </td></tr></table>", 
-                   data_->key, data_->value);
-}
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 bool key_equality (char* first, char* second)
-{   
+{      
     return (strcmp (first, second) == 0);
 }
 
