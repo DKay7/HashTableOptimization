@@ -17,7 +17,7 @@ uint64_t const_hash (char* str)
 uint64_t first_letter_code_hash (char* str)
 {   
     assert (str);
-    return str[0];
+    return (uint64_t)str[0];
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -53,11 +53,11 @@ uint64_t rol_hash (char* str)
     const int shift_size_bits = CHAR_BIT * sizeof (uint64_t) - 1;
     const uint64_t highest_bit_mask = (uint64_t)1 << shift_size_bits;
 
-    uint64_t hash = str[0];
+    uint64_t hash = (uint64_t)str[0];
     
     while (*(str++) != 0)
     {
-        hash = ((hash << 1) + ((hash & highest_bit_mask) >> shift_size_bits)) ^ (*str);
+        hash = ((hash << 1) + ((hash & highest_bit_mask) >> shift_size_bits)) ^ (uint64_t)(*str);
     }
 
     return hash;
@@ -72,11 +72,11 @@ uint64_t ror_hash (char* str)
     const int shift_size_bits = CHAR_BIT * sizeof (uint64_t) - 1;
     const int lowest_bit_mask = 1;
 
-    uint64_t hash = str[0];
+    uint64_t hash = (uint64_t)str[0];
 
     while (*(str++) != 0)
     {
-        hash = ((hash >> 1) + ((hash & lowest_bit_mask) << shift_size_bits)) ^ (*str);
+        hash = ((hash >> 1) + ((hash & lowest_bit_mask) << shift_size_bits)) ^ (uint64_t)(*str);
     }
 
     return hash;
@@ -95,7 +95,7 @@ uint64_t polynimial_rolling_hash (char* str)
 
     while (*(str++) != 0)
     {
-        hash = (hash + ((*str) - 'a' + 1) * power) % m;
+        hash = (hash + (uint64_t)((*str) - 'a' + 1) * power) % m;
         power = (p * power) % m;
     }
 
