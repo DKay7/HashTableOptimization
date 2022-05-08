@@ -364,7 +364,7 @@
 
 Благодаря им, мы можем быть уверены, что размер таблицы всегда будет степенью двойки. Кроме того, было проверено, что при расширении хэш-таблицы ее размер увеличивается в кратное 2 число раз. В функции поиска положения по ключу строка =key_hash % hash_table->size= заменилась на =key_hash & (hash_table->size - 1)=.
 
-На всякий случай, мы измерили дисперсию хэш-функции в измененной хэш-таблице, и она уменьшилась на 83% (=D_old = 0.6681=, =D_new = 0.5533=)/
+На всякий случай, мы измерили дисперсию хэш-функции в измененной хэш-таблице, и она уменьшилась на 83% (=D_old = 0.6681=, =D_new = 0.5533=).
 
 Все оптимизации были проделаны, можно запускать второй тест.
 
@@ -436,3 +436,289 @@
 #+BEGIN_HTML
   </details>
 #+END_HTML
+
+Как видно, первая оптимизация принесла свои плоды. Теперь =polynimial_rolling_hash= спустился по всем показателям: стал занимать в 2 раза меньше времени, уменьшились кэш- и бранч- мисы в этой функции. Также из тестов видно, что наш следующий кандидат на оптимизацию -- =HashTableInsert<char*, char*>=. Давайте посмотрим детальнее, какая именно инструкция занимает столько времени. 
+
+#+BEGIN_HTML
+  <details>
+  <summary>Трейс  HashTableInsert</summary>
+#+END_HTML
+#+BEGIN_SRC
+
+ Percent |	Source code & Disassembly of main for cpu-clock (48 samples, percent: local period)
+---------------------------------------------------------------------------------------------------
+         :
+         :
+         :
+         :          Дизассемблирование раздела .text:
+         :
+         :          0000000000002d63 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)>:
+         :          _Z15HashTableInsertIPcS0_EbP9HashTableIT_T0_ES2_S3_():
+         :          }
+         :
+         :          //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+         :
+         :          template <typename K, typename V>
+         :          bool HashTableInsert (HashTable<K, V>* hash_table, K key, V value)
+    0.00 :   2d63:       endbr64
+    0.00 :   2d67:       push   r15
+    0.00 :   2d69:       push   r14
+    0.00 :   2d6b:       push   r13
+    0.00 :   2d6d:       push   r12
+    0.00 :   2d6f:       push   rbp
+    0.00 :   2d70:       push   rbx
+    0.00 :   2d71:       sub    rsp,0x18
+    0.00 :   2d75:       mov    QWORD PTR [rsp+0x8],rdx
+         :          {
+         :          assert (hash_table);
+    0.00 :   2d7a:       test   rdi,rdi
+    0.00 :   2d7d:       je     2e88 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x125>
+    0.00 :   2d83:       mov    rbx,rdi
+    0.00 :   2d86:       mov    rbp,rsi
+         :          _Z23__HashTableSearchForKeyIPcS0_EmP9HashTableIT_T0_ES2_():
+         :          uint64_t position = __HashTableGetPosition (hash_table, key);
+    4.17 :   2d89:       call   268b <unsigned long __HashTableGetPosition<char*, char*>(HashTable<char*, char*>*, char*)>
+         :          if (hash_table->buckets[position].status == BUCKET_EMPTY)
+    0.00 :   2d8e:       lea    rdx,[rax+rax*2]
+    0.00 :   2d92:       mov    rax,QWORD PTR [rbx+0x10]
+    2.08 :   2d96:       lea    rax,[rax+rdx*8]
+    0.00 :   2d9a:       cmp    DWORD PTR [rax+0x10],0xbeef
+   45.83 :   2da1:       je     2deb <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x88>
+         :          uint64_t val_pos =  hash_table->buckets[position].start_index;
+    0.00 :   2da3:       mov    r13,QWORD PTR [rax]
+         :          uint64_t bucket_size = hash_table->buckets[position].len;
+    6.25 :   2da6:       mov    r15,QWORD PTR [rax+0x8]
+         :          for (uint64_t i = 0; i < bucket_size; i++)
+    0.00 :   2daa:       test   r15,r15
+    0.00 :   2dad:       je     2deb <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x88>
+    0.00 :   2daf:       mov    r12d,0x0
+         :          if (hash_table->key_equality_func (hash_table->values->list[val_pos].data.key, key))
+    0.00 :   2db5:       mov    r14,r13
+    0.00 :   2db8:       shl    r14,0x5
+    0.00 :   2dbc:       mov    rax,QWORD PTR [rbx+0x18]
+    0.00 :   2dc0:       mov    rax,QWORD PTR [rax]
+    0.00 :   2dc3:       mov    rdi,QWORD PTR [rax+r14*1+0x10]
+   29.17 :   2dc8:       mov    rsi,rbp
+    0.00 :   2dcb:       call   QWORD PTR [rbx+0x8]
+    0.00 :   2dce:       test   al,al
+    0.00 :   2dd0:       jne    2ea7 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x144>
+         :          val_pos = (uint64_t) hash_table->values->list[val_pos].next;
+    0.00 :   2dd6:       mov    rax,QWORD PTR [rbx+0x18]
+    0.00 :   2dda:       mov    rax,QWORD PTR [rax]
+    0.00 :   2ddd:       movsxd r13,DWORD PTR [rax+r14*1+0x4]
+         :          for (uint64_t i = 0; i < bucket_size; i++)
+    2.08 :   2de2:       add    r12,0x1
+    0.00 :   2de6:       cmp    r15,r12
+    0.00 :   2de9:       jne    2db5 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x52>
+         :          _Z15HashTableInsertIPcS0_EbP9HashTableIT_T0_ES2_S3_():
+         :          // check if key is already in the table
+         :          if (__HashTableSearchForKey(hash_table, key) != (uint64_t) MAX_LIST_ELEMENT)
+         :          ASS (false && "KEY IS ALREADY IN THE TABLE", false);
+         :
+         :          // check capacity and increase if needed
+         :          if (((double) hash_table->buckets_capacity *  HT_INCREASE_DECISION_COEF >= (double) hash_table->size) \
+    0.00 :   2deb:       mov    rax,QWORD PTR [rbx+0x28]
+    0.00 :   2def:       test   rax,rax
+    0.00 :   2df2:       js     2efa <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x197>
+    0.00 :   2df8:       pxor   xmm0,xmm0
+    0.00 :   2dfc:       cvtsi2sd xmm0,rax
+    4.17 :   2e01:       mulsd  xmm0,QWORD PTR [rip+0x1e27]        # 4c30 <_IO_stdin_used+0xc30>
+    0.00 :   2e09:       mov    rax,QWORD PTR [rbx+0x20]
+    0.00 :   2e0d:       test   rax,rax
+    0.00 :   2e10:       js     2f18 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x1b5>
+    0.00 :   2e16:       pxor   xmm1,xmm1
+    0.00 :   2e1a:       cvtsi2sd xmm1,rax
+    0.00 :   2e1f:       comisd xmm0,xmm1
+    0.00 :   2e23:       jb     2e2f <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0xcc>
+         :          && hash_table->resizable)
+    0.00 :   2e25:       cmp    BYTE PTR [rbx+0x30],0x0
+    0.00 :   2e29:       jne    2f36 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x1d3>
+         :          HashTableRehash (hash_table, false);
+         :
+         :          HT_Pair<K, V> pair = HashTablePairCtor (key, value);
+         :          uint64_t position = __HashTableGetPosition (hash_table, key);
+    0.00 :   2e2f:       mov    rsi,rbp
+    0.00 :   2e32:       mov    rdi,rbx
+    0.00 :   2e35:       call   268b <unsigned long __HashTableGetPosition<char*, char*>(HashTable<char*, char*>*, char*)>
+         :
+         :          if (hash_table->buckets[position].status == BUCKET_EMPTY)
+    0.00 :   2e3a:       lea    r12,[rax+rax*2]
+    0.00 :   2e3e:       shl    r12,0x3
+    0.00 :   2e42:       mov    rax,r12
+    0.00 :   2e45:       add    rax,QWORD PTR [rbx+0x10]
+    0.00 :   2e49:       cmp    DWORD PTR [rax+0x10],0xbeef
+    0.00 :   2e50:       je     2f48 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x1e5>
+         :          else
+         :          {
+         :          // check size and go through list
+         :          uint64_t index_to_insert_after = hash_table->buckets[position].start_index;
+         :
+         :          int list_position = LLInsertAfter (hash_table->values, (int) index_to_insert_after, pair);
+    0.00 :   2e56:       mov    rsi,QWORD PTR [rax]
+    0.00 :   2e59:       mov    rdi,QWORD PTR [rbx+0x18]
+    0.00 :   2e5d:       mov    rdx,rbp
+    0.00 :   2e60:       mov    rcx,QWORD PTR [rsp+0x8]
+    0.00 :   2e65:       call   28a1 <int LLInsertAfter<HT_Pair<char*, char*> >(LinkedList<HT_Pair<char*, char*> >*, int, HT_Pair<char*, char*>)>
+         :          ASS (list_position > 0 && "Incorrect list position", false);
+    0.00 :   2e6a:       test   eax,eax
+    0.00 :   2e6c:       jle    2fc1 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x25e>
+         :          hash_table->buckets[position].len += 1;
+    0.00 :   2e72:       add    r12,QWORD PTR [rbx+0x10]
+    0.00 :   2e76:       add    QWORD PTR [r12+0x8],0x1
+         :          hash_table->buckets_capacity += 1;
+    0.00 :   2e7c:       add    QWORD PTR [rbx+0x28],0x1
+         :
+         :          return true;
+    0.00 :   2e81:       mov    eax,0x1
+    0.00 :   2e86:       jmp    2eeb <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x188>
+         :          assert (hash_table);
+    0.00 :   2e88:       lea    rcx,[rip+0x1c51]        # 4ae0 <_IO_stdin_used+0xae0>
+    0.00 :   2e8f:       mov    edx,0xdf
+    0.00 :   2e94:       lea    rsi,[rip+0x1458]        # 42f3 <_IO_stdin_used+0x2f3>
+    0.00 :   2e9b:       lea    rdi,[rip+0x146f]        # 4311 <_IO_stdin_used+0x311>
+    0.00 :   2ea2:       call   1240 <__assert_fail@plt>
+         :          if (__HashTableSearchForKey(hash_table, key) != (uint64_t) MAX_LIST_ELEMENT)
+    0.00 :   2ea7:       mov    rax,QWORD PTR [rbx+0x18]
+    0.00 :   2eab:       mov    eax,DWORD PTR [rax+0x10]
+    0.00 :   2eae:       add    eax,0x1
+    0.00 :   2eb1:       cdqe
+    0.00 :   2eb3:       cmp    rax,r13
+    0.00 :   2eb6:       je     2deb <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x88>
+         :
+         :          # ifdef __va_arg_pack
+         :          __fortify_function int
+         :          fprintf (FILE *__restrict __stream, const char *__restrict __fmt, ...)
+         :          {
+         :          return __fprintf_chk (__stream, __USE_FORTIFY_LEVEL - 1, __fmt,
+    0.00 :   2ebc:       mov    r8d,0xe3
+         :          fprintf():
+    0.00 :   2ec2:       lea    rcx,[rip+0x142a]        # 42f3 <_IO_stdin_used+0x2f3>
+    0.00 :   2ec9:       lea    rdx,[rip+0x1c60]        # 4b30 <_IO_stdin_used+0xb30>
+    0.00 :   2ed0:       mov    esi,0x1
+    0.00 :   2ed5:       mov    rdi,QWORD PTR [rip+0x4144]        # 7020 <stderr@@GLIBC_2.2.5>
+    0.00 :   2edc:       mov    eax,0x0
+    0.00 :   2ee1:       call   1300 <__fprintf_chk@plt>
+         :          _Z15HashTableInsertIPcS0_EbP9HashTableIT_T0_ES2_S3_():
+         :          ASS (false && "KEY IS ALREADY IN THE TABLE", false);
+    0.00 :   2ee6:       mov    eax,0x0
+         :          }
+         :          }
+    2.08 :   2eeb:       add    rsp,0x18
+    2.08 :   2eef:       pop    rbx
+    2.08 :   2ef0:       pop    rbp
+    0.00 :   2ef1:       pop    r12
+    0.00 :   2ef3:       pop    r13
+    0.00 :   2ef5:       pop    r14
+    0.00 :   2ef7:       pop    r15
+    0.00 :   2ef9:       ret
+         :          if (((double) hash_table->buckets_capacity *  HT_INCREASE_DECISION_COEF >= (double) hash_table->size) \
+    0.00 :   2efa:       mov    rdx,rax
+    0.00 :   2efd:       shr    rdx,1
+    0.00 :   2f00:       and    eax,0x1
+    0.00 :   2f03:       or     rdx,rax
+    0.00 :   2f06:       pxor   xmm0,xmm0
+    0.00 :   2f0a:       cvtsi2sd xmm0,rdx
+    0.00 :   2f0f:       addsd  xmm0,xmm0
+    0.00 :   2f13:       jmp    2e01 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x9e>
+    0.00 :   2f18:       mov    rdx,rax
+    0.00 :   2f1b:       shr    rdx,1
+    0.00 :   2f1e:       and    eax,0x1
+    0.00 :   2f21:       or     rdx,rax
+    0.00 :   2f24:       pxor   xmm1,xmm1
+    0.00 :   2f28:       cvtsi2sd xmm1,rdx
+    0.00 :   2f2d:       addsd  xmm1,xmm1
+    0.00 :   2f31:       jmp    2e1f <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0xbc>
+         :          HashTableRehash (hash_table, false);
+    0.00 :   2f36:       mov    esi,0x0
+    0.00 :   2f3b:       mov    rdi,rbx
+    0.00 :   2f3e:       call   29dd <bool HashTableRehash<char*, char*>(HashTable<char*, char*>*, bool)>
+    0.00 :   2f43:       jmp    2e2f <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0xcc>
+         :          int list_position = LLInsertAfter (hash_table->values, hash_table->values->list[0].prev, pair);
+    0.00 :   2f48:       mov    rdi,QWORD PTR [rbx+0x18]
+    0.00 :   2f4c:       mov    rax,QWORD PTR [rdi]
+    0.00 :   2f4f:       mov    rdx,rbp
+    0.00 :   2f52:       mov    rcx,QWORD PTR [rsp+0x8]
+    0.00 :   2f57:       mov    esi,DWORD PTR [rax]
+    0.00 :   2f59:       call   28a1 <int LLInsertAfter<HT_Pair<char*, char*> >(LinkedList<HT_Pair<char*, char*> >*, int, HT_Pair<char*, char*>)>
+         :          ASS (list_position > 0, false);
+    0.00 :   2f5e:       test   eax,eax
+    0.00 :   2f60:       jle    2f8d <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x22a>
+         :          hash_table->buckets[position] = { .start_index = (uint64_t) list_position,
+    0.00 :   2f62:       add    r12,QWORD PTR [rbx+0x10]
+    0.00 :   2f66:       cdqe
+    0.00 :   2f68:       mov    QWORD PTR [r12],rax
+    0.00 :   2f6c:       mov    QWORD PTR [r12+0x8],0x1
+    0.00 :   2f75:       mov    DWORD PTR [r12+0x10],0xbaca
+         :          hash_table->buckets_capacity += 1;
+    0.00 :   2f7e:       add    QWORD PTR [rbx+0x28],0x1
+         :          return true;
+    0.00 :   2f83:       mov    eax,0x1
+    0.00 :   2f88:       jmp    2eeb <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x188>
+    0.00 :   2f8d:       mov    r8d,0xf1
+         :          fprintf():
+    0.00 :   2f93:       lea    rcx,[rip+0x1359]        # 42f3 <_IO_stdin_used+0x2f3>
+    0.00 :   2f9a:       lea    rdx,[rip+0x1be7]        # 4b88 <_IO_stdin_used+0xb88>
+    0.00 :   2fa1:       mov    esi,0x1
+    0.00 :   2fa6:       mov    rdi,QWORD PTR [rip+0x4073]        # 7020 <stderr@@GLIBC_2.2.5>
+    0.00 :   2fad:       mov    eax,0x0
+    0.00 :   2fb2:       call   1300 <__fprintf_chk@plt>
+         :          _Z15HashTableInsertIPcS0_EbP9HashTableIT_T0_ES2_S3_():
+         :          ASS (list_position > 0, false);
+    0.00 :   2fb7:       mov    eax,0x0
+    0.00 :   2fbc:       jmp    2eeb <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x188>
+    0.00 :   2fc1:       mov    r8d,0x100
+         :          fprintf():
+    0.00 :   2fc7:       lea    rcx,[rip+0x1325]        # 42f3 <_IO_stdin_used+0x2f3>
+    0.00 :   2fce:       lea    rdx,[rip+0x1bfb]        # 4bd0 <_IO_stdin_used+0xbd0>
+    0.00 :   2fd5:       mov    esi,0x1
+    0.00 :   2fda:       mov    rdi,QWORD PTR [rip+0x403f]        # 7020 <stderr@@GLIBC_2.2.5>
+    0.00 :   2fe1:       mov    eax,0x0
+    0.00 :   2fe6:       call   1300 <__fprintf_chk@plt>
+         :          _Z15HashTableInsertIPcS0_EbP9HashTableIT_T0_ES2_S3_():
+         :          ASS (list_position > 0 && "Incorrect list position", false);
+    0.00 :   2feb:       mov    eax,0x0
+    0.00 :   2ff0:       jmp    2eeb <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x188>
+#+END_SRC
+
+#+BEGIN_HTML
+  </details>
+#+END_HTML
+
+В ходе анализа дизассемблированного кода было выявлено, что самая медленная часть находится не в самой функции =HashTableInsert=, а в =HashTableSearchForKey=, которую вызывает первая для проверки коллизий. Самая медленная строка, на удивление -- возвращение обратно в вызывающую функцию в случае, когда у нас есть бакет с таким же хэшем, но данного элемента в этом бакете нет, а именно: =58,64 │     → je       402e53 <bool HashTableInsert<char*, char*>(HashTable<char*, char*>*, char*, char*)+0x103>=.
+
+После длительного анализа кода, было сделано предположение, что инструкция занимает так много времени не из-за какого-то бранч-миса или плохо оптимизированной функции, а просто потому, что в таком случае происходит линейный поиск, как это видно из кода функции:
+#+BEGIN_HTML
+  <details>
+  <summary>Код функции <code>__HashTableSearchForKey</code></summary>
+#+END_HTML
+#+BEGIN_SRC
+template <typename K, typename V>
+uint64_t __HashTableSearchForKey (HashTable<K, V>* hash_table, K key)
+{
+    uint64_t position = __HashTableGetPosition (hash_table, key);
+
+    if (hash_table->buckets[position].status == BUCKET_NOT_EMPTY)
+    {   
+        uint64_t val_pos =  hash_table->buckets[position].start_index;
+        uint64_t bucket_size = hash_table->buckets[position].len;
+
+        for (uint64_t i = 0; i < bucket_size; i++)
+        {   
+            if (hash_table->key_equality_func (hash_table->values->list[val_pos].data.key, key))
+                return val_pos;
+
+            val_pos = (uint64_t) hash_table->values->list[val_pos].next;
+        }
+    }
+
+
+    return (uint64_t) MAX_LIST_ELEMENT;
+}
+#+END_SRC
+
+#+BEGIN_HTML
+  </details>
+#+END_HTML
+
+То есть при возникновении коллизии, программа просматривает весь бакет на наличие совпадаюшего элемента. Из-за этого линейного поиска возврат из функции занимает долго времени. К сожалению или счастью, оптимизировать здесь нечего.
+
