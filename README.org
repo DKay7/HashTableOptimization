@@ -263,7 +263,10 @@
   <details>
 #+END_HTML
 
-Результат первого теста.
+
+#+BEGIN_HTML
+<summary>Результат первого теста.</summary>
+#+END_HTML
 
 #+BEGIN_SRC
 # To display the perf.data header info, please use --header/--header-only options.
@@ -369,7 +372,9 @@
   <details>
 #+END_HTML
 
-Резульат второго теста.
+#+BEGIN_HTML
+<summary>Резульат второго теста.</summary>
+#+END_HTML
 
 #+BEGIN_SRC
 # To display the perf.data header info, please use --header/--header-only options.
