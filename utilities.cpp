@@ -87,7 +87,7 @@ void FillIndexesArrayWithRandomValues (int* array, size_t arr_size, int max_inde
     srand (time(0));
      
     for (size_t i = 0; i < arr_size; i++)
-        array[i] = rand () % (max_index + 1);
+        array[i] = rand () % (max_index);
      
 }
 
@@ -100,7 +100,7 @@ void SearchSpeedTest (int* idx_array, size_t arr_size, HashTable<char *, char*>*
         int index = idx_array[i];
         char* line = csv_data->lines[index].ptr;
         char* key = strsep(&line, ",");
-
+                
         uint64_t found_idx = HashTableFind<char*, char*> (ht, key);
 
         if (found_idx >= (uint64_t) ht->values->size + 1)

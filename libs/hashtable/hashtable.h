@@ -195,10 +195,7 @@ uint64_t __HashTableSearchForKey (HashTable<K, V>* hash_table, K key)
 {
     uint64_t position = __HashTableGetPosition (hash_table, key);
 
-    if (hash_table->buckets[position].status == BUCKET_EMPTY)
-        return (uint64_t) MAX_LIST_ELEMENT;
-    
-    else
+    if (hash_table->buckets[position].status == BUCKET_NOT_EMPTY)
     {   
         uint64_t val_pos =  hash_table->buckets[position].start_index;
         uint64_t bucket_size = hash_table->buckets[position].len;
@@ -211,6 +208,7 @@ uint64_t __HashTableSearchForKey (HashTable<K, V>* hash_table, K key)
             val_pos = (uint64_t) hash_table->values->list[val_pos].next;
         }
     }
+
 
     return (uint64_t) MAX_LIST_ELEMENT;
 }

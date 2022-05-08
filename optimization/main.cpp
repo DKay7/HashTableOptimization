@@ -16,7 +16,7 @@ int main()
 {
     Text csv_data = {};
     TextCtor (&csv_data, "../data/en-ru.csv");
-    const size_t idx_arr_size = 256;
+    const size_t idx_arr_size = 32768;
     int* idx_for_search_array = (int*) calloc (idx_arr_size, sizeof(*idx_for_search_array));
 
     HashTable<char*, char*> ht = {};
@@ -28,6 +28,9 @@ int main()
 
     SearchSpeedTest (idx_for_search_array, idx_arr_size, &ht, &csv_data);
 
+    HashTableDtor (&ht);
+    TextDtor (&csv_data);
+    free (idx_for_search_array);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
