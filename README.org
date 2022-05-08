@@ -258,13 +258,10 @@
 
 Первый тест, без оптимизаций (в дальнейшем мы будем сравнивать
 результаты оптимизаций с ним) дал следующие показатели:
+=Cреднее время выполнения: 0m0,080s=
 
 #+BEGIN_HTML
   <details>
-#+END_HTML
-
-
-#+BEGIN_HTML
 <summary>Результат первого теста.</summary>
 #+END_HTML
 
@@ -368,6 +365,7 @@
 
 Все оптимизации были проделаны, можно запускать второй тест.
 
+=Среднее время выполнения: 0m0,037s=
 #+BEGIN_HTML
   <details>
 #+END_HTML
@@ -721,4 +719,210 @@ uint64_t __HashTableSearchForKey (HashTable<K, V>* hash_table, K key)
 #+END_HTML
 
 То есть при возникновении коллизии, программа просматривает весь бакет на наличие совпадаюшего элемента. Из-за этого линейного поиска возврат из функции занимает долго времени. К сожалению или счастью, оптимизировать здесь нечего.
+
+К стыду автора, на данном этапе было замечено, что тест ищет всего 256 случайных ключей, в то время, как объем словаря ~55000 элементов. Для более объективного результата, конечно, надо сделать тест больше. Было принято решение увеличить тест до 32678 случайных ключей. Плюс в том, что на объективность уже проведенных оптимизаций это не повлияет, зато позволит найти еще кандидатов на оптимизацию. Кроме того, для более надежных результатов было предложено несколько раз запускать программу и профилировать ее с флагом =append=, который позволяет накапливать, а не переписывать данные, но, к сожалению, в ходе изучения профайлера оказалось, что данный флаг был убран из новых версий из-за нестабильного поведения. Итак, третий тест.
+
+#+BEGIN_HTML
+  <details>
+  <summary>Резульат третьего теста.</summary>
+#+END_HTML
+
+#+BEGIN_SRC
+# To display the perf.data header info, please use --header/--header-only options.
+#
+# dso: main
+#
+# Total Lost Samples: 0
+#
+# Samples: 2K of event 'cpu-clock'
+# Event count (approx.): 45820000
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    16.72%  main     [.] HashTableFind<char*, char*>
+    14.32%  main     [.] HashTableInsert<char*, char*>
+     7.38%  main     [.] polynimial_rolling_hash
+     3.71%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     1.70%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     1.62%  main     [.] __HashTableGetPosition<char*, char*>
+     1.27%  main     [.] HashTableCtor<char*, char*>
+     1.13%  main     [.] FillLinesArray
+     0.79%  main     [.] SearchSpeedTest
+     0.61%  main     [.] FillIndexesArrayWithRandomValues
+     0.48%  main     [.] FillHashTableFromStrCSV
+     0.48%  main     [.] key_equality
+     0.17%  main     [.] PoisonData<HT_Pair<char*, char*> >
+     0.13%  main     [.] 0x00000000000012a0
+     0.04%  main     [.] 0x0000000000001220
+     0.04%  main     [.] 0x0000000000001274
+     0.04%  main     [.] 0x00000000000012a4
+     0.04%  main     [.] 0x0000000000001300
+
+
+# Samples: 2K of event 'cache-misses'
+# Event count (approx.): 1257615
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    17.38%  main     [.] HashTableFind<char*, char*>
+    11.23%  main     [.] HashTableInsert<char*, char*>
+     7.99%  main     [.] polynimial_rolling_hash
+     2.23%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     1.29%  main     [.] __HashTableGetPosition<char*, char*>
+     1.20%  main     [.] SearchSpeedTest
+     1.11%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     0.81%  main     [.] key_equality
+     0.46%  main     [.] FillLinesArray
+     0.38%  main     [.] HashTableCtor<char*, char*>
+     0.36%  main     [.] 0x00000000000012a0
+     0.20%  main     [.] FillHashTableFromStrCSV
+     0.09%  main     [.] 0x0000000000001220
+     0.08%  main     [.] FillIndexesArrayWithRandomValues
+     0.08%  main     [.] 0x00000000000012a4
+
+
+# Samples: 1K of event 'branch-misses'
+# Event count (approx.): 429344
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    19.73%  main     [.] HashTableInsert<char*, char*>
+    11.78%  main     [.] HashTableFind<char*, char*>
+     4.28%  main     [.] polynimial_rolling_hash
+     2.75%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     0.99%  main     [.] __HashTableGetPosition<char*, char*>
+     0.65%  main     [.] FillHashTableFromStrCSV
+     0.61%  main     [.] FillLinesArray
+     0.28%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     0.26%  main     [.] FillIndexesArrayWithRandomValues
+     0.16%  main     [.] 0x00000000000012a0
+     0.11%  main     [.] key_equality
+     0.08%  main     [.] 0x0000000000001220
+     0.08%  main     [.] main
+     0.07%  main     [.] SearchSpeedTest
+     0.05%  main     [.] 0x0000000000001274
+     0.03%  main     [.] HashTableCtor<char*, char*>
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+#+END_SRC
+
+#+BEGIN_HTML
+  </details>
+#+END_HTML
+
+Теперь все встало на свои места. Функция =HashTableFind=, как и полагается, занимает большую часть времени. Если взглянуть на дизассемблированный трейс этой функции, можно увидеть, что самой долгой ее частью, как ни странно, является проверка на то, пустой ли бакет (сравнение статуса бакета с константой =BUCKET_NOT_EMPTY=). Тогда было решено при создании массива бакетов инициализировать их длины значением -1. В таком случае в функции  =HashTableFind= цикл for, проходящийся по найденному бакету, не запустится ни разу, если бакет пустой, т.е. дополнительные проверки нам не нужны. 
+
+Пришло время 4 теста. 
+
+#+BEGIN_HTML
+  <details>
+  <summary>Резульат четвертого теста.</summary>
+#+END_HTML
+
+#+BEGIN_SRC
+# To display the perf.data header info, please use --header/--header-only options.
+#
+# dso: main
+#
+# Total Lost Samples: 0
+#
+# Samples: 2K of event 'cpu-clock'
+# Event count (approx.): 46040000
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    16.33%  main     [.] SearchSpeedTest
+    15.20%  main     [.] HashTableInsert<char*, char*>
+     6.86%  main     [.] polynimial_rolling_hash
+     3.34%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     1.65%  main     [.] __HashTableGetPosition<char*, char*>
+     1.48%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     1.17%  main     [.] HashTableCtor<char*, char*>
+     1.13%  main     [.] FillLinesArray
+     0.83%  main     [.] FillHashTableFromStrCSV
+     0.70%  main     [.] FillIndexesArrayWithRandomValues
+     0.43%  main     [.] PoisonData<HT_Pair<char*, char*> >
+     0.13%  main     [.] key_equality
+     0.09%  main     [.] 0x0000000000001270
+     0.09%  main     [.] 0x00000000000012a0
+     0.04%  main     [.] CountSymbol
+     0.04%  main     [.] TextCtor
+     0.04%  main     [.] 0x0000000000001220
+     0.04%  main     [.] 0x00000000000012a4
+     0.04%  main     [.] 0x0000000000001300
+
+
+# Samples: 2K of event 'cache-misses'
+# Event count (approx.): 1250419
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    17.04%  main     [.] SearchSpeedTest
+    10.63%  main     [.] HashTableInsert<char*, char*>
+     6.32%  main     [.] polynimial_rolling_hash
+     2.33%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     1.44%  main     [.] __HashTableGetPosition<char*, char*>
+     1.13%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     0.71%  main     [.] key_equality
+     0.62%  main     [.] FillHashTableFromStrCSV
+     0.30%  main     [.] HashTableCtor<char*, char*>
+     0.28%  main     [.] FillLinesArray
+     0.14%  main     [.] 0x00000000000012a4
+     0.13%  main     [.] FillIndexesArrayWithRandomValues
+     0.11%  main     [.] 0x0000000000001270
+     0.08%  main     [.] 0x0000000000001220
+     0.06%  main     [.] 0x0000000000001300
+     0.05%  main     [.] CountSize
+     0.04%  main     [.] CountSymbol
+     0.03%  main     [.] main
+     0.03%  main     [.] 0x00000000000012a0
+
+
+# Samples: 1K of event 'branch-misses'
+# Event count (approx.): 426108
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    20.94%  main     [.] HashTableInsert<char*, char*>
+    11.13%  main     [.] SearchSpeedTest
+     5.49%  main     [.] polynimial_rolling_hash
+     1.81%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     1.09%  main     [.] __HashTableGetPosition<char*, char*>
+     0.78%  main     [.] FillHashTableFromStrCSV
+     0.50%  main     [.] FillLinesArray
+     0.36%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     0.24%  main     [.] 0x00000000000012a0
+     0.11%  main     [.] FillIndexesArrayWithRandomValues
+     0.03%  main     [.] key_equality
+     0.03%  main     [.] main
+     0.01%  main     [.] 0x0000000000001300
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+#+END_SRC
+
+#+BEGIN_HTML
+  </details>
+#+END_HTML
+
+Теперь функция =HashTableFind= спряталась в трейс функции =SearchSpeedTest=, являясь ее самой медленной частью. Тем не менее, самая медленная часть =HashTableFind= -- сравнение на равенство элементов одного бакета, что, к сожалению, нельзя оптимизировать известными автору методами. 
+
+Итак, мы вернулись к кандидату, который уже был у нас -- =HashTableInsert=. Это знак того, что все возможные оптимизации мы провели и стоит сделать финальный бенчмарк.
+
+Итак, напомним, что до всех оптимизации время исполнения программы занимало порядка =0.080= секунд. Теперь же оно занимает =0.030-0.035= секунд. Различие более чем в два раза можно считать результатом успешной оптимизации хэш-таблицы. 
+
+
 

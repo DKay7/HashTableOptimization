@@ -40,7 +40,7 @@ enum BUCKET_STATUSES
 // flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 struct HT_Bucket
-{
+{   
     size_t start_index;
     size_t len;
     BUCKET_STATUSES status;
@@ -94,8 +94,10 @@ static HT_Bucket* HashTableBucketsArrayCtor (uint64_t size)
     memset (buckets, POISON,  size * sizeof (*buckets));
 
     for (size_t i = 0; i < size; i++)
+    {   
+        buckets[i].len = -1;
         buckets[i].status = BUCKET_EMPTY;
-
+    }
     return buckets;
 }
 
@@ -267,7 +269,7 @@ uint64_t HashTableFind (HashTable<K, V>* hash_table, K key)
     assert (hash_table);
 
     uint64_t bucket_position = __HashTableGetPosition (hash_table, key);
-    ASS (hash_table->buckets[bucket_position].status != BUCKET_EMPTY, (uint64_t) MAX_LIST_ELEMENT);
+    // ASS (hash_table->buckets[bucket_position].status == BUCKET_NOT_EMPTY, (uint64_t) MAX_LIST_ELEMENT);
 
     uint64_t bucket_size = hash_table->buckets[bucket_position].len;
     uint64_t val_pos = hash_table->buckets[bucket_position].start_index;
