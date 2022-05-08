@@ -128,3 +128,21 @@ void SearchSpeedTest (int* idx_array, size_t arr_size, HashTable<char *, char*>*
     }
 
 }
+
+void IntrinSearchSpeedTest (int* idx_array, size_t arr_size, HashTable<__m256i *, char*>* ht, Text* csv_data)
+{
+    for (size_t i = 0; i < arr_size; i++)
+    {   
+        int index = idx_array[i];
+        char* line = csv_data->lines[index].ptr;
+        char* key = strsep(&line, ",");
+                
+        uint64_t found_idx = HashTableFind<__m256i*, char*> (ht, (__m256i*)key);
+
+        if (found_idx >= (uint64_t) ht->values->size + 1)
+        {
+            fprintf (stderr, "ELEMENT %s NOT FOUND. CONTINUE\n", key);
+        }
+    }
+
+}

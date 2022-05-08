@@ -3,7 +3,7 @@
 #include <malloc.h>
 #include <assert.h>
 #include <limits.h>
-
+#include <immintrin.h>
 #include "hash_functions_to_test.h"
 
 uint64_t const_hash (char* str)
@@ -92,6 +92,23 @@ uint64_t polynimial_rolling_hash (char* str)
     uint64_t hash = 0;
     uint64_t power = 1;
 
+    while (*(str++) != 0)
+    {
+        hash = (hash + (uint64_t)((*str) - 'a' + 1) * power);
+        power = (p * power);
+    }
+
+    return hash;
+}
+
+uint64_t intrin_polynimial_rolling_hash (__m256i* intrin_str)
+{
+    const int p = 53;
+
+    uint64_t hash = 0;
+    uint64_t power = 1;
+    char* str = (char*) intrin_str;
+     
     while (*(str++) != 0)
     {
         hash = (hash + (uint64_t)((*str) - 'a' + 1) * power);

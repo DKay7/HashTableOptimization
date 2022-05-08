@@ -8,6 +8,7 @@
 #include <limits.h>
 
 #include "hash_functions_to_test.h"
+#include <immintrin.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -18,6 +19,7 @@ uint64_t sum_of_letter_codes_hash (char* str);
 uint64_t rol_hash (char* str);
 uint64_t ror_hash (char* str);
 uint64_t polynimial_rolling_hash (char* str);
+uint64_t intrin_polynimial_rolling_hash (__m256i* intrin_str);
 uint64_t murmur_hash(char* string);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
