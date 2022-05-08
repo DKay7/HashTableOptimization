@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <locale.h>
 #include <assert.h>
+#include <immintrin.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -40,4 +41,8 @@ bool key_equality (char* first, char* second)
     return (strcmp (first, second) == 0);
 }
 
+bool intrins_key_equality (__m256i* first, __m256i* second)
+{
+    return _mm256_testc_si256 (_mm256_loadu_si256(first), _mm256_loadu_si256(second));
+}
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

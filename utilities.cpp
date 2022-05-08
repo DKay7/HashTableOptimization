@@ -2,6 +2,7 @@
 #include "utilities.h"
 #include "hashtable.h"
 #include <time.h>
+#include <immintrin.h>
 
 void FillHashTableFromStrCSV (Text* csv_data, HashTable<char*, char*>* ht)
 {   
@@ -16,6 +17,23 @@ void FillHashTableFromStrCSV (Text* csv_data, HashTable<char*, char*>* ht)
         value = strsep(&line, ",");
 
         HashTableInsert<char*, char*>(ht, key, value);
+    }
+
+}
+
+void IntrinsFillHashTableFromStrCSV (Text* csv_data, HashTable<__m256i*, char*>* ht)
+{   
+    char *key, *value;
+    char *line;
+
+    for (size_t idx = 0; idx < csv_data->non_empty_lines; idx++)
+    {   
+        line = csv_data->lines[idx].ptr;
+        
+        key = strsep(&line, ",");
+        value = strsep(&line, ",");
+
+        HashTableInsert<__m256i*, char*>(ht, (__m256i*)key, value);
     }
 
 }
