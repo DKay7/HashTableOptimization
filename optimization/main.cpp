@@ -16,7 +16,7 @@ int main()
 {
     Text csv_data = {};
     TextCtor (&csv_data, "../data/en-ru.csv");
-    const size_t idx_arr_size = 32768;
+    const size_t idx_arr_size = 262144;
     int* idx_for_search_array = (int*) calloc (idx_arr_size, sizeof(*idx_for_search_array));
 
     HashTable<char*, char*> ht = {};
