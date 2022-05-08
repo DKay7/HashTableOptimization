@@ -79,3 +79,34 @@ void CollectAllStats (HashTable<char*, char*>* ht, Text* csv_data,
     WriteStatsAboutHashTable (ht, distribution_stat_filename);   
     WriteExecutionHashTableStats (exec_time, ht->size, stat_filename); 
 }
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void FillIndexesArrayWithRandomValues (int* array, size_t arr_size, int max_index)
+{   
+    srand (time(0));
+     
+    for (size_t i = 0; i < arr_size; i++)
+        array[i] = rand () % (max_index + 1);
+     
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void SearchSpeedTest (int* idx_array, size_t arr_size, HashTable<char *, char*>* ht, Text* csv_data)
+{
+    for (size_t i = 0; i < arr_size; i++)
+    {   
+        int index = idx_array[i];
+        char* line = csv_data->lines[index].ptr;
+        char* key = strsep(&line, ",");
+
+        uint64_t found_idx = HashTableFind<char*, char*> (ht, key);
+
+        if (found_idx >= (uint64_t) ht->values->size + 1)
+        {
+            fprintf (stderr, "ELEMENT %s NOT FOUND. CONTINUE\n", key);
+        }
+    }
+
+}

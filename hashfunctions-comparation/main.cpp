@@ -19,7 +19,7 @@ int main ()
     setlocale(LC_NUMERIC, "C");
 
     Text csv_data = {};
-    TextCtor (&csv_data, "data/en-ru.csv");
+    TextCtor (&csv_data, "../data/en-ru.csv");
 
     #define TEST(func)                                                                  \
     {                                                                                   \
@@ -31,11 +31,11 @@ int main ()
         HashTableCtor<char*, char*> (&var_size_ht,   50000, func, key_equality, true);  \
                                                                                         \
         CollectAllStats (&const_size_ht, &csv_data,                                     \
-                         "./data/results/[const_size]/[" #func "][stat].csv",             \
-                         "./data/results/[const_size]/[" #func "][distribution].csv");    \
+                         "../data/results/[const_size]/[" #func "][stat].csv",          \
+                         "../data/results/[const_size]/[" #func "][distribution].csv"); \
         CollectAllStats (&var_size_ht, &csv_data,                                       \
-                         "./data/results/[var_size]/[" #func "][stat].csv",             \
-                         "./data/results/[var_size]/[" #func "][distribution].csv");    \
+                         "../data/results/[var_size]/[" #func "][stat].csv",            \
+                         "../data/results/[var_size]/[" #func "][distribution].csv");   \
                                                                                         \
         HashTableDtor (&const_size_ht);                                                 \
         HashTableDtor (&var_size_ht);                                                   \

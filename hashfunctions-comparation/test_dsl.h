@@ -9,4 +9,5 @@ TEST(len_hash);
 TEST(sum_of_letter_codes_hash); 
 TEST(rol_hash);
 TEST(ror_hash);
-TEST(polynimial_rolling_hash); 
+TEST(polynimial_rolling_hash);
+TEST(murmur_hash);
