@@ -263,68 +263,170 @@
   <details>
 #+END_HTML
 
-Результат первого теста
+Результат первого теста.
 
 #+BEGIN_SRC
-    # Samples: 469  of event 'cpu-clock'
-    # Event count (approx.): 46900000  
-    #  
-    # Overhead  Command  Symbol                                     
-    # ........  .......  ..........................................  
-    #  
-        23.24%  main     [.] polynimial_rolling_hash  
-        8.96%  main     [.] __HashTableSearchForKey<char*, char*>  
-        7.89%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
-        4.05%  main     [.] __HashTableGetPosition<char*, char*>
-        1.71%  main     [.] HashTableInsert<char*, char*>
-        1.28%  main     [.] FillHashTableFromStrCSV
-        1.07%  main     [.] FillLinesArray
-        1.07%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
-        0.64%  main     [.] HashTableBucketsArrayCtor
-        0.64%  main     [.] LLCtor<HT_Pair<char*, char*> >
-        0.43%  main     [.] CountSymbol
-        0.43%  main     [.] PoisonData<HT_Pair<char*, char*> >
-        0.21%  main     [.] HashTableFind<char*, char*>
-        0.21%  main     [.] key_equality
-        0.21%  main     [.] 0x0000000000001244
-        0.21%  main     [.] 0x0000000000001260
+# To display the perf.data header info, please use --header/--header-only options.
+#
+# dso: main
+#
+# Total Lost Samples: 0
+#
+# Samples: 340  of event 'cpu-clock'
+# Event count (approx.): 34000000
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    16.18%  main     [.] polynimial_rolling_hash
+    15.88%  main     [.] HashTableInsert<char*, char*>
+     6.47%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     2.06%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     1.18%  main     [.] FillLinesArray
+     1.18%  main     [.] 0x0000000000001270
+     0.59%  main     [.] FillHashTableFromStrCSV
+     0.59%  main     [.] 0x00000000000011f0
+     0.29%  main     [.] key_equality
+     0.29%  main     [.] main
 
-    # Samples: 397  of event 'cache-misses'
-    # Event count (approx.): 840712
-    #
-    # Overhead  Command  Symbol                                    
-    # ........  .......  ..........................................
-    #
-        20.02%  main     [.] polynimial_rolling_hash
-        8.64%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
-        5.04%  main     [.] __HashTableSearchForKey<char*, char*>
-        2.15%  main     [.] HashTableInsert<char*, char*>
-        1.89%  main     [.] __HashTableGetPosition<char*, char*>
-        1.64%  main     [.] FillLinesArray
-        0.44%  main     [.] FillHashTableFromStrCSV
-        0.35%  main     [.] key_equality
-        0.26%  main     [.] HashTableBucketsArrayCtor
-        0.19%  main     [.] 0x0000000000001290
-        0.10%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
 
-    # Samples: 359  of event 'branch-misses'
-    # Event count (approx.): 332997
-    #
-    # Overhead  Command  Symbol                                   
-    # ........  .......  .........................................
-    #
-        26.19%  main     [.] __HashTableGetPosition<char*, char*>
-        5.83%  main     [.] __HashTableSearchForKey<char*, char*>
-        5.80%  main     [.] HashTableInsert<char*, char*>
-        5.33%  main     [.] polynimial_rolling_hash
-        0.80%  main     [.] FillLinesArray
-        0.53%  main     [.] FillHashTableFromStrCSV
-        0.43%  main     [.] CountSymbol
-        0.24%  main     [.] HashTablePairCtor<char*, char*>
-        0.22%  main     [.] key_equality
-        0.22%  main     [.] HashTableFind<char*, char*>
+# Samples: 282  of event 'cache-misses'
+# Event count (approx.): 790389
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    13.07%  main     [.] polynimial_rolling_hash
+    12.88%  main     [.] HashTableInsert<char*, char*>
+     8.18%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     0.92%  main     [.] key_equality
+     0.60%  main     [.] HashTableFind<char*, char*>
+     0.35%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     0.33%  main     [.] main
+     0.28%  main     [.] FillLinesArray
+     0.19%  main     [.] FillHashTableFromStrCSV
+
+
+# Samples: 248  of event 'branch-misses'
+# Event count (approx.): 312338
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    27.37%  main     [.] HashTableInsert<char*, char*>
+     4.60%  main     [.] polynimial_rolling_hash
+     1.13%  main     [.] FillLinesArray
+     0.84%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     0.78%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     0.36%  main     [.] FillHashTableFromStrCSV
+     0.27%  main     [.] HashTableFind<char*, char*>
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
 #+END_SRC
 
+
+#+BEGIN_HTML
+  </details>
+#+END_HTML
+
+Первый тест выявил две проблемы:
+1. Функция хэширования работает достаточно медленно для функции, которая вызывается при любой попытке вставить элемент или найти элемент по ключу
+2. Вставка в хэш-таблицу довольно медленная, поскольку содержит операцию взятия остатка по составному числу
+
+После первого теста было решено провести две оптимизации:
+1. Сделать размер хэш-таблицы степенью двойки, что позволит использовать опреатор =&= вместо оператора =%=
+2. Оптимизировать функцию =polynimial_rolling_hash=, а именно:
+    1. Протестировать, сильно ли ухудшится хэш, если убрать оператор =%=.
+    2. Если оптимизация выше не поможет, переписать часть или всю функцию на ассемблере.
+3. Проверка бранч-мисов в функции =HashTableInsert<char*, char*>= выявила, что больше всего мисов происходит в строчках:
+
+#+BEGIN_SRC
+    if (hash_table->buckets[position].status == BUCKET_EMPTY)
+#+END_SRC
+
+На них приходится почти 85+% всех мисов в функции. Пока неясно, как это чинить, так что оставим напоследок.
+
+Для начала мы протестировали новую хэш-функцию (без операции взятия остатка от деления), дисперсия оказалась такой же с точностью до -6 порядка, поэтому было принято решение убрать операцию взятия остатка от деления из хэша.
+
+После этого, в конструкторе хэш-таблицы были добавлены следующие строки:
+
+#+BEGIN_SRC
+    int table_int_log = (int) ceil (log2 (table_size));
+    table_size = pow (2, table_int_log);
+#+END_SRC
+
+Благодаря им, мы можем быть уверены, что размер таблицы всегда будет степенью двойки. Кроме того, было проверено, что при расширении хэш-таблицы ее размер увеличивается в кратное 2 число раз. В функции поиска положения по ключу строка =key_hash % hash_table->size= заменилась на =key_hash & (hash_table->size - 1)=.
+
+На всякий случай, мы измерили дисперсию хэш-функции в измененной хэш-таблице, и она уменьшилась на 83% (=D_old = 0.6681=, =D_new = 0.5533=)/
+
+Все оптимизации были проделаны, можно запускать второй тест.
+
+#+BEGIN_HTML
+  <details>
+#+END_HTML
+
+Резульат второго теста.
+
+#+BEGIN_SRC
+# To display the perf.data header info, please use --header/--header-only options.
+#
+# dso: main
+#
+# Total Lost Samples: 0
+#
+# Samples: 245  of event 'cpu-clock'
+# Event count (approx.): 24500000
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    19.59%  main     [.] HashTableInsert<char*, char*>
+     7.76%  main     [.] polynimial_rolling_hash
+     4.90%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     2.86%  main     [.] HashTableCtor<char*, char*>
+     2.45%  main     [.] FillLinesArray
+     2.04%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     2.04%  main     [.] __HashTableGetPosition<char*, char*>
+     0.82%  main     [.] FillHashTableFromStrCSV
+     0.41%  main     [.] HashTableFind<char*, char*>
+     0.41%  main     [.] 0x0000000000001230
+
+
+# Samples: 213  of event 'cache-misses'
+# Event count (approx.): 780701
+#
+# Overhead  Command  Symbol                                    
+# ........  .......  ..........................................
+#
+    17.58%  main     [.] HashTableInsert<char*, char*>
+     6.90%  main     [.] polynimial_rolling_hash
+     3.62%  main     [.] LLIncreaseSize<HT_Pair<char*, char*> >
+     2.20%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     1.92%  main     [.] FillHashTableFromStrCSV
+     1.11%  main     [.] __HashTableGetPosition<char*, char*>
+     0.76%  main     [.] HashTableCtor<char*, char*>
+     0.48%  main     [.] FillLinesArray
+     0.46%  main     [.] HashTableFind<char*, char*>
+
+
+# Samples: 182  of event 'branch-misses'
+# Event count (approx.): 303806
+#
+# Overhead  Command  Symbol                                   
+# ........  .......  .........................................
+#
+    31.23%  main     [.] HashTableInsert<char*, char*>
+     3.68%  main     [.] LLInsertAfter<HT_Pair<char*, char*> >
+     1.53%  main     [.] FillLinesArray
+     1.17%  main     [.] __HashTableGetPosition<char*, char*>
+     1.02%  main     [.] polynimial_rolling_hash
+     0.42%  main     [.] FillHashTableFromStrCSV
+
+#+END_SRC
 
 #+BEGIN_HTML
   </details>

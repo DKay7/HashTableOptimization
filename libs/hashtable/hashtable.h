@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <malloc.h>
 #include <inttypes.h>
+#include <math.h>
 
 // flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // DEFINES
@@ -113,6 +114,9 @@ void HashTableCtor (HashTable<K, V>* hash_table, size_t table_size,
     hash_table->hash_function = HashFunction;
     hash_table->key_equality_func = KeyEqualityFunc;
 
+    int table_int_log = (int) ceil (log2 (table_size));
+    table_size = pow (2, table_int_log);
+
     hash_table->size = table_size;
     hash_table->resizable = resizable;
     
@@ -179,8 +183,9 @@ uint64_t __HashTableGetPosition (HashTable<K, V>* hash_table, K key)
     uint64_t key_hash = hash_table->hash_function (key);
 
     // it works only if hash table's sise is the power of 2
-    // return key_hash & (hash_table->size - 1);
-    return key_hash % hash_table->size;
+    return key_hash & (hash_table->size - 1);
+    // works with any size, but its slow!
+    //return key_hash % hash_table->size;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
